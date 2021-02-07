@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Row, ListGroup, Image, Col } from 'react-bootstrap';
+import React, { useEffect } from 'react';
+import { Row, ListGroup, Image } from 'react-bootstrap';
 
 
 export default function SectionComponent({
@@ -11,7 +11,6 @@ export default function SectionComponent({
     useEffect(() => {
         if(sectionRef?.current && sizeUpdate) {
             const element = sectionRef?.current;
-            console.log(element.getBoundingClientRect());
             sizeUpdate(sectionNumber, element.getBoundingClientRect()?.height);
         }
     }, [sectionRef, sectionNumber, sizeUpdate]);
@@ -20,7 +19,7 @@ export default function SectionComponent({
     const duplicateContent = image && description && alt;
 
     return (
-        <div ref={sectionRef} className="container justify-content-md-center md-12">
+        <div className="container justify-content-md-center md-12" ref={sectionRef} >
             {title && (<Row className='py-3' xl md='auto'><h2>{title}</h2></Row>)}
             {subTitle && (<Row><h4>{subTitle}</h4></Row>)}
             {duplicateContent && (

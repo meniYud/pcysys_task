@@ -1,5 +1,4 @@
 import axios from 'axios';
-import mockedSections from './mockData/data';
 
 export default function AsyncHandler({endpoints}) {
     const retrievedData = {
@@ -9,9 +8,8 @@ export default function AsyncHandler({endpoints}) {
     };
 
     if(!endpoints.length) {
-        const timer = setTimeout(() => {
-            
-        }, 2000);
+        retrievedData.error = 'Please provide Endpoints'
+        return retrievedData;
     }
 
     const promises = endpoints.map(endpoint => {
@@ -23,8 +21,8 @@ export default function AsyncHandler({endpoints}) {
         return axios.request(options);
     });
 
-    Promise.allSettled(promises).
-        then((results) => {
+    Promise.allSettled(promises)
+        .then((results) => {
             retrievedData.data = results.data;
             retrievedData.error = '';
         }).catch(error => {

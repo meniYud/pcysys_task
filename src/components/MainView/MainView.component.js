@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {SectionContext} from '../../sectionsApi/SectionsContext'
-import { Container, Image, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap';
+import { Container, Image, Row, Col } from 'react-bootstrap';
 import ModalComponent from '../Modal/Modal.component';
 import Navigator from '../Navigator/Navigator.component';
 import SectionComponent from '../Section/Section.component';
@@ -8,15 +8,12 @@ import PageComponent from '../Page/Page.component';
 
 export default function MainViewComponent(props) {
     const { sections, loadSections, setSections } = useContext(SectionContext);
-    const [localSections, setLocalSections] = useState(sections);
-
+    
     useEffect(() => {
         if(!sections.length) {
-            setLocalSections(loadSections());
+            loadSections();
         }
     }, [loadSections, sections.length]);
-
-    
 
     const [finalRender, setFinalRender] = useState(false);
     const [sectionsSize, setSectionsSize] = useState([]);
@@ -78,9 +75,10 @@ export default function MainViewComponent(props) {
             }
             const newSections = random(sections);
             setFinalRender(false);
+            setPageAllocation([]);
             setSections(newSections);
         }
-    }, [sections])
+    }, [setSections])
 
     useEffect(() => {
         document.addEventListener('keydown', (e) => handleKeyDown(e, sections));
@@ -110,7 +108,7 @@ export default function MainViewComponent(props) {
                     }
                 </Container>
             }
-            {sections.length && finalRender &&
+            {sections.length && finalRender && pageAllocation.length &&
                 <>
                     <ModalComponent />
                     <Row className="justify-content-md-center">
