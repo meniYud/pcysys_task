@@ -27,7 +27,7 @@ export default function SectionComponent({
                     <article className="row single-post mt-5 no-gutters">
                         <div className="col-md-12">
                             <div className="image-wrapper float-left pr-3">
-                                <img src={image} width='200px' alt={alt} />
+                                <img src={image} width='300px' alt={alt} />
                             </div>
                             <div className="single-post-content-wrapper p-3">
                                 {description}

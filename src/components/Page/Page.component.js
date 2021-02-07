@@ -3,7 +3,6 @@ import { Container, Row, Col, Table } from 'react-bootstrap';
 import SectionComponent from '../Section/Section.component';
 
 export default function PageComponent({pages, pageNumber}) {
-    
     const pagedReport = (pageNumber) => {
         const pageSections = pages[pageNumber];
         return pageSections.map((section, index) => {

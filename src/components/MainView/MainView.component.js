@@ -6,23 +6,41 @@ import Navigator from '../Navigator/Navigator.component';
 import SectionComponent from '../Section/Section.component';
 import PageComponent from '../Page/Page.component';
 
+/*
+MainViewComponent is the main component of the reporter.
+this component uses:
+    SectionComponent to render each section
+    PageComponent to render the final pages
+    Navigator to render the navigation-buttons (pages)
+    ModalComponent for the final modal
+*/
+
 export default function MainViewComponent(props) {
+    // we start by reading the context
     const { sections, loadSections, setSections } = useContext(SectionContext);
     
+    // we use sections.length to indicate that the sections needs to be loaded.
     useEffect(() => {
         if(!sections.length) {
+            //in order to fetch data from real endpoints, you can call the following method passing an array of endpoints
             loadSections();
         }
     }, [loadSections, sections.length]);
 
+    // this flag will indicate that the page allocation is done - and we can render the sections under their 'correct' page
     const [finalRender, setFinalRender] = useState(false);
+    // this array will hold & update each section's height
     const [sectionsSize, setSectionsSize] = useState([]);
+    // this array will hold & update each section's correct page
     const [pageAllocation, setPageAllocation] = useState([]);
+    // this "integer" will indicate which page is currently "active" (visible)
     const [radioVal, setRadioVal] = useState(0);
 
     const sectionsCount = sections.length;
+    // pager object is used to track the accumulated height of each page.
     let pager = {current: 0, occupied: 0};
     
+    // this method implement Fisher-Yates randomization algorithm
     const random = (array) => {
         let randomizedArray = array;
         for (let i = array.length - 1; i > 0; i--) {
@@ -33,6 +51,7 @@ export default function MainViewComponent(props) {
         return randomizedArray;
     }
 
+    // this is a callback, that receives an index of a section and its rendered-height, and updates the sectionsSize array accordingly
     const updateSectionsSize = (index, size) => {
         if(sectionsSize[index] !== size) {
             const prevSizes = sectionsSize;
@@ -42,11 +61,18 @@ export default function MainViewComponent(props) {
         }
     }
 
+    //this method updates the pager object (which tracks the accumulated height of each page )
     const updatePager = ({current, occupied}) => {
         pager = {current, occupied};
     }
     
 
+    //this is the main calculation method of the component.
+    // once all the section "updated" their height in the sectionsSize array, we're iterating over the
+    // sizes array, and allocating each section to page. when the accumulated height of the page does
+    // not allows to add the next section (will cause violation of max-height), the pager object will move
+    // on to the next page.
+    // once done will all sections - it will set the "finalRender" flag to true - to enable the final render.
     useEffect(() => {
         if((sectionsSize.length === sectionsCount) && (pager.current === 0)) {
             const finalPages= [[]];
@@ -62,11 +88,13 @@ export default function MainViewComponent(props) {
             });
         }
 
-        if ((sectionsSize.length === sectionsCount) && (pageAllocation.length > 0)) {
+        if ((sectionsSize.length === sectionsCount) && (pager.current > 0)) {
             setFinalRender(true);
         }
     }, [sectionsSize, sections]);
 
+    // this method "looks" for alt-shift-s keystroke, to randomize the sections array
+    // (which will trigger page re-allocation)
     const handleKeyDown = React.useCallback((e, sections) => {
         e.preventDefault();
         if (e.shiftKey && e.altKey && (e.code === 'KeyS')) {
@@ -74,12 +102,14 @@ export default function MainViewComponent(props) {
                 return;
             }
             const newSections = random(sections);
+            setRadioVal(1);
             setFinalRender(false);
             setPageAllocation([]);
             setSections(newSections);
         }
     }, [setSections])
 
+    // here we adding the event listener to "catch" the alt-shift-s keystroke
     useEffect(() => {
         document.addEventListener('keydown', (e) => handleKeyDown(e, sections));
         return () => {
@@ -87,6 +117,7 @@ export default function MainViewComponent(props) {
         }
     }, [sections, handleKeyDown]);
 
+    
     return (
         <main>
             {!sections.length && (
