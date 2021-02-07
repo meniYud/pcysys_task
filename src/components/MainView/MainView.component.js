@@ -1,21 +1,32 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {SectionContext} from '../../sectionsApi/SectionsContext'
-import { Container, Image, Row, Col } from 'react-bootstrap';
+import { Container, Image, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap';
+import ModalComponent from '../Modal/Modal.component';
+import Navigator from '../Navigator/Navigator.component';
 import SectionComponent from '../Section/Section.component';
-import Header from '../Header';
-import Footer from '../Footer';
+import PageComponent from '../Page/Page.component';
 
 export default function MainViewComponent(props) {
-    const { sections, loadSections } = useContext(SectionContext);
+    const { sections, loadSections, setSections } = useContext(SectionContext);
+    const [localSections, setLocalSections] = useState(sections);
+
+    useEffect(() => {
+        if(!sections.length) {
+            setLocalSections(loadSections());
+        }
+    }, [loadSections, sections.length]);
+
+    
 
     const [finalRender, setFinalRender] = useState(false);
     const [sectionsSize, setSectionsSize] = useState([]);
     const [pageAllocation, setPageAllocation] = useState([]);
-    const [randomized, setRandomized] = useState(false);
-    const [pressed, setPressed] = useState(null);
+    const [radioVal, setRadioVal] = useState(0);
 
+    const sectionsCount = sections.length;
+    let pager = {current: 0, occupied: 0};
+    
     const random = (array) => {
-        setRandomized(false);
         let randomizedArray = array;
         for (let i = array.length - 1; i > 0; i--) {
             let j = Math.floor(Math.random() * (i + 1));
@@ -24,18 +35,7 @@ export default function MainViewComponent(props) {
         
         return randomizedArray;
     }
-    
 
-    useEffect(() => {
-        if(!sections.length) {
-            loadSections();
-        }
-    }, [loadSections, sections.length]);
-
-    const sectionsCount = sections.length;
-    const initialPages = randomized ? random(sections) : sections.sort((a,b) => a.section_number - b.section_number);
-    let pager = {current: 0, occupied: 0};
-    
     const updateSectionsSize = (index, size) => {
         if(sectionsSize[index] !== size) {
             const prevSizes = sectionsSize;
@@ -48,95 +48,80 @@ export default function MainViewComponent(props) {
     const updatePager = ({current, occupied}) => {
         pager = {current, occupied};
     }
+    
 
     useEffect(() => {
         if((sectionsSize.length === sectionsCount) && (pager.current === 0)) {
             const finalPages= [[]];
             sectionsSize.forEach((singleSize, index) => {
                 if(pager.occupied + singleSize > 1200){ //no place in this page - move to the next page
-                    finalPages.push([initialPages[index]]);
+                    finalPages.push([sections[index]]);
                     updatePager({current: pager.current + 1, occupied: singleSize});
                 } else { //current page is not fully occupied
-                    finalPages[finalPages.length - 1].push(initialPages[index]);
+                    finalPages[finalPages.length - 1].push(sections[index]);
                     updatePager({current: pager.current, occupied: pager.occupied + singleSize});
                 }
                 setPageAllocation(finalPages);
             });
         }
 
-        if ((sectionsSize.length === sectionsCount) && (pager.current > 0)) {
+        if ((sectionsSize.length === sectionsCount) && (pageAllocation.length > 0)) {
             setFinalRender(true);
         }
-        
-        console.log(pageAllocation);
-        console.log(sectionsSize);
-    }, [sectionsSize]);
+    }, [sectionsSize, sections]);
 
-    const pagedReport = (pageNumber) => {
-        const pageSections = pageAllocation[pageNumber];
-        return pageSections.map((section, index) => {
-            return <SectionComponent key={index} section={section} />
-        });
-    }
-
-    const [, updateState] = React.useState();
-    const forceUpdate = React.useCallback(() => updateState({}), []);
-
-    const handleKeyDown = (e) => {
+    const handleKeyDown = React.useCallback((e, sections) => {
         e.preventDefault();
         if (e.shiftKey && e.altKey && (e.code === 'KeyS')) {
-            console.log('fire!');
-            setRandomized(true);
-            forceUpdate();
+            if(!sections || !sections.length) {
+                return;
+            }
+            const newSections = random(sections);
+            setFinalRender(false);
+            setSections(newSections);
         }
-    }
+    }, [sections])
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeyDown);
-        
-    
+        document.addEventListener('keydown', (e) => handleKeyDown(e, sections));
         return () => {
           document.removeEventListener('keydown', handleKeyDown);
         }
-    }, [randomized]);
+    }, [sections, handleKeyDown]);
 
     return (
-        <>
-            <Header />
-            <main key={!randomized}>
-                {!sections.length && (
+        <main>
+            {!sections.length && (
+                <Row className="justify-content-md-center">
+                    <Col xs={12} sm={4} md={4}>
+                        <Image src='/images/no-data.jpg' fluid />
+                    </Col>
+                </Row>
+            )}
+            {sections.length && !finalRender &&
+                <Container>
+                    {
+                        sections.map((section, sectionNumber) => {
+                            if (!section) {
+                                return null;
+                            }
+                            return <SectionComponent key={sectionNumber} section={section} sectionNumber={sectionNumber} sizeUpdate={updateSectionsSize} />;
+                        })
+                    }
+                </Container>
+            }
+            {sections.length && finalRender &&
+                <>
+                    <ModalComponent />
                     <Row className="justify-content-md-center">
-                        <Col xs={12} sm={4} md={4}>
-                            <Image src='/images/no-data.jpg' fluid />
-                        </Col>
+                        <Navigator active={radioVal} setActive={setRadioVal} pagesCount={pageAllocation.length + 2} />
                     </Row>
-                )}
-                {sections.length && !finalRender &&
-                    <Container>
-                        {
-                            initialPages.map((page, pageNumber) => {
-                                if (!page) {
-                                    return null;
-                                }
-                                return <SectionComponent key={pageNumber} section={page} sizeUpdate={updateSectionsSize} />;
-                            })
-                        }
-                    </Container>
-                }
-                {sections.length && finalRender &&
-                    <Container>
-                        {pagedReport(1)}
-                        <footer>
-                            <Row>
-                                <Col className='text-right py-3'>
-                                    {/* {`page number: ${}`} */}
-                                </Col>
-                            </Row>
-                        </footer>
-                    </Container>
-                }            
-            </main>
-            <Footer />
-        </>
+                    <PageComponent pages={pageAllocation} pageNumber={radioVal} />
+                </>
+            }
+            {
+                sections.length && finalRender && console.log(sectionsSize)
+            }
+        </main>
     )
 }

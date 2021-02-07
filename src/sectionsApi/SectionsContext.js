@@ -6,17 +6,19 @@ export const SectionContext = React.createContext();
 
 export default function ContextProvider({ children }) {
     const [sections, setSections] = useState([]);
+    const ordered = (sectionsArray) => sectionsArray.sort((a,b) => a.section_number - b.section_number);
 
     const loadSections = (endpoints = []) => {
         if (endpoints.length) {
-            setSections(AsyncHandler({ endpoints }));
+            setSections(ordered(AsyncHandler({ endpoints })));
         } else {// no real endpoints provided - use mock data
-            setSections(mockedSections);
+            setSections(ordered(mockedSections));
         };
     }
 
     const value = {
         sections,
+        setSections,
         loadSections
     };
 

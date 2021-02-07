@@ -3,6 +3,7 @@ import { Container, Row, ListGroup, Image, Col } from 'react-bootstrap';
 
 
 export default function SectionComponent({
+    sectionNumber,
     section,
     sizeUpdate = null
 }) {
@@ -10,16 +11,17 @@ export default function SectionComponent({
     useEffect(() => {
         if(sectionRef?.current && sizeUpdate) {
             const element = sectionRef?.current;
-            sizeUpdate(section.section_number - 1, element.getBoundingClientRect()?.height);
+            console.log(element.getBoundingClientRect());
+            sizeUpdate(sectionNumber, element.getBoundingClientRect()?.height);
         }
-    }, [sectionRef, section.section_number, sizeUpdate]);
+    }, [sectionRef, sectionNumber, sizeUpdate]);
 
     const { title, image, description, subTitle, points, alt } = section;
     const duplicateContent = image && description && alt;
 
     return (
-        <Container ref={sectionRef}>
-            {title && (<Row><h2>{title}</h2></Row>)}
+        <div ref={sectionRef} className="container justify-content-md-center md-12">
+            {title && (<Row className='py-3' xl md='auto'><h2>{title}</h2></Row>)}
             {subTitle && (<Row><h4>{subTitle}</h4></Row>)}
             {duplicateContent && (
                 <Row>
@@ -49,6 +51,6 @@ export default function SectionComponent({
                     {points.map((point, index) => <ListGroup.Item key={index}>{point}</ListGroup.Item>)}
                 </ListGroup>
             )}
-        </Container>
+        </div>
     );
 }
