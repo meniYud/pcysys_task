@@ -1,10 +1,15 @@
+import SectionProvider from './sectionsApi/SectionsContext';
+import ConnectedView from './components/MainView';
+
 
 
 function App() {
   return (
-    <div className="App">
-      <h1>main page</h1>
-    </div>
+      <div className="App">
+        <SectionProvider>
+          <ConnectedView />
+        </SectionProvider>
+      </div>
   );
 }
 
