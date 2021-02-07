@@ -1,6 +1,7 @@
 import React from 'react';
 import { ButtonGroup, ToggleButton } from 'react-bootstrap';
 
+// this function renders a row of single-selection-buttons to navigate between pages
 export default function NavigatorComponent({
     active,
     setActive,

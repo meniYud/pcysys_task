@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
+// this function renderers simple modal with the option to close it
 export default function ModalComponent(props) {
     const [showModal, setShowModal] = useState(true);
 

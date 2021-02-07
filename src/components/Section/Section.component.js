@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react';
 import { Row, ListGroup, Image } from 'react-bootstrap';
 
+// this components renderers a given section
+// if sizeUpdate callback is passed, it will fire it upon ref refresh
 
 export default function SectionComponent({
     sectionNumber,
     section,
     sizeUpdate = null
 }) {
+    // we define a ref
     const sectionRef = sizeUpdate && React.createRef();
+    //and use it to update the mainView with the section height
     useEffect(() => {
         if(sectionRef?.current && sizeUpdate) {
             const element = sectionRef?.current;
@@ -15,6 +19,7 @@ export default function SectionComponent({
         }
     }, [sectionRef, sectionNumber, sizeUpdate]);
 
+    //render of a section is based on the data schema.
     const { title, image, description, subTitle, points, alt } = section;
     const duplicateContent = image && description && alt;
 

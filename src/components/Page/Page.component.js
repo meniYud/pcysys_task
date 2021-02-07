@@ -2,7 +2,12 @@ import React from 'react';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import SectionComponent from '../Section/Section.component';
 
+// in this component we render each page of the final render
+// the components receives all the pages (were each page is an array of sections)
+// and a page number to display
 export default function PageComponent({pages, pageNumber}) {
+
+    // if the required page number > 1, the component will render the page (array of sections)
     const pagedReport = (pageNumber) => {
         const pageSections = pages[pageNumber];
         return pageSections.map((section, index) => {
@@ -10,6 +15,7 @@ export default function PageComponent({pages, pageNumber}) {
         });
     }
 
+    // if the required page number = 0, the component will render the static first page
     const firstPageStyle = {
         backgroundImage: 'url(/images/firstPage.jpg)',
         backgroundSize: 'cover',
@@ -27,6 +33,7 @@ export default function PageComponent({pages, pageNumber}) {
         );
     }
 
+    // if the required page number = 1, the component will render the content index
     const contentIndex = () => {
         const flatContent = pages.map((page, index) => {
             return page.map(section => {
